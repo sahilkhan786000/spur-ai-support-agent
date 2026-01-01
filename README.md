@@ -126,6 +126,7 @@ src/
  ├── config/          # Prisma client and environment configuration
  ├── app.ts           # Express application configuration
  └── server.ts        # Server entry point
+```
 
 ---
 
