@@ -1,4 +1,4 @@
-# 🪐 Spur AI Support Agent – Take-Home Assignment
+# 🪐 Spur AI Support Agent
 
 This project is a small AI-powered customer support chat application built as part of the **Spur – Founding Full-Stack Engineer** take-home assignment.
 
