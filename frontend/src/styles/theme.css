@@ -270,6 +270,16 @@ button:disabled {
    WELCOME CARD
 ========================= */
 
+.WelcomeCardContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100vw;
+  height: 100vh;
+}
+
+
 .welcome-card {
   width: 380px;
   padding: 32px;
@@ -280,6 +290,7 @@ button:disabled {
   box-shadow: 0 0 50px rgba(122,162,255,0.15);
   animation: fadeSlide 0.4s ease-out;
   margin: auto;
+  
 }
 
 .welcome-card h1 {

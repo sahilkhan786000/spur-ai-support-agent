@@ -18,6 +18,7 @@ export function WelcomeCard({ onStart }: Props) {
   }
 
   return (
+    <div className = "WelcomeCardContainer">
     <div className="welcome-card">
       <h1>Welcome to Support</h1>
       <p>
@@ -38,6 +39,7 @@ export function WelcomeCard({ onStart }: Props) {
       >
         Start Chat
       </button>
+    </div>
     </div>
   );
 }
