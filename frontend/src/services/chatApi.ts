@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8000";
+const API_BASE = "https://spur-ai-support-agent-4m9d.onrender.com";
 
 type SendMessageResponse = {
   reply: string;
