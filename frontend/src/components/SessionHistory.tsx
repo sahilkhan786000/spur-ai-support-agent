@@ -35,12 +35,12 @@ export function SessionHistory({ onClose }: Props) {
         <h3>Recent conversations</h3>
         {onClose && (
           <button className="close-btn" onClick={onClose}>
-            ×
+            âœ•
           </button>
         )}
       </div>
 
-      {loading && <div className="session-empty subtle">Loading conversations…</div>}
+      {loading && <div className="session-empty subtle">Loading conversations...</div>}
 
       {!loading && sessions.length === 0 && <div className="session-empty subtle">No previous conversations</div>}
 
