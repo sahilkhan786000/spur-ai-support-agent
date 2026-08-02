@@ -23,48 +23,44 @@ export function ChatWindow() {
   }
 
   return (
-    <div className="chat-layout">
-      {/* LEFT: Chat Window */}
-      <div className="chat-container">
-        <header className="chat-header">
+    <div className="chat-window">
+      <header className="chat-header">
+        <div className="agent-profile">
+          <div className="avatar">L</div>
           <div>
-            🪐 Spur AI Support
-            <div className="subtle">Talking with {userName}</div>
+            <div className="agent-name">LumenCare AI</div>
+            <div className="agent-status">Online - ready to help</div>
           </div>
-
-          <div className="header-actions">
-            <button
-              className="hamburger"
-              onClick={() => setShowSessions(true)}
-            >
-              ☰
-            </button>
-            <button className="home-btn" onClick={goHome}>
-              Home
-            </button>
-          </div>
-        </header>
-
-        <div className="messages">
-          {messages.map((m, i) => (
-            <MessageBubble
-              key={i}
-              sender={m.sender}
-              text={m.text}
-              label={m.sender === "user" ? userName : "AI"}
-            />
-          ))}
-          {loading && <TypingIndicator />}
-          <div ref={bottomRef} />
         </div>
 
-        <ChatInput onSend={handleSend} disabled={loading} />
+        <div className="header-actions">
+          <button className="ghost-btn" onClick={() => setShowSessions((prev) => !prev)}>
+            Recent
+          </button>
+          <button className="ghost-btn" onClick={goHome}>Restart</button>
+          <button className="ghost-btn" onClick={() => window.location.reload()}>Close</button>
+        </div>
+      </header>
+
+      {showSessions && <SessionHistory onClose={() => setShowSessions(false)} />}
+
+      <div className="message-list">
+        {messages.length === 0 && !loading ? (
+          <div className="empty-state">
+            <p>Hi {userName}.</p>
+            <p>Ask anything about orders, returns, billing, or product support.</p>
+          </div>
+        ) : (
+          messages.map((message, index) => (
+            <MessageBubble key={`${message.sender}-${index}`} message={message} />
+          ))
+        )}
+
+        {loading && <TypingIndicator />}
+        <div ref={bottomRef} />
       </div>
 
-      {/* RIGHT: Session Panel */}
-      <div className={`session-wrapper ${showSessions ? "open" : ""}`}>
-        <SessionHistory onClose={() => setShowSessions(false)} />
-      </div>
+      <ChatInput onSend={handleSend} loading={loading} />
     </div>
   );
 }

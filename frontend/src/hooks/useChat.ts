@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { sendMessage, fetchHistory } from "../services/chatApi";
+import { fetchHistory, sendMessage } from "../services/chatApi";
 
 type Message = {
   sender: "user" | "ai";
@@ -9,13 +9,9 @@ type Message = {
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
-
-  const sessionId = localStorage.getItem("sessionId");
-
-
+  const sessionId = typeof window !== "undefined" ? localStorage.getItem("sessionId") : null;
   const slowResponseShown = useRef(false);
 
- 
   useEffect(() => {
     if (!sessionId) return;
 
@@ -28,53 +24,41 @@ export function useChat() {
       });
   }, [sessionId]);
 
-
   async function handleSend(text: string) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
-   
-    setMessages((prev) => [
-      ...prev,
-      { sender: "user", text: trimmed },
-    ]);
-
+    setMessages((prev) => [...prev, { sender: "user", text: trimmed }]);
     setLoading(true);
     slowResponseShown.current = false;
 
-
-    const slowTimer = setTimeout(() => {
+    const slowTimer = window.setTimeout(() => {
       if (!slowResponseShown.current) {
         slowResponseShown.current = true;
         setMessages((prev) => [
           ...prev,
           {
             sender: "ai",
-            text: "Thanks for your patience â€” Iâ€™m checking this for you.",
+            text: "Thanks for your patience — I’m reviewing your request and preparing a helpful reply.",
           },
         ]);
       }
-    }, 4000);
+    }, 3500);
 
     try {
       const res = await sendMessage(trimmed, sessionId || undefined);
 
-   
       if (!sessionId && res.sessionId) {
         localStorage.setItem("sessionId", res.sessionId);
       }
 
-      setMessages((prev) => [
-        ...prev,
-        { sender: "ai", text: res.reply },
-      ]);
+      setMessages((prev) => [...prev, { sender: "ai", text: res.reply }]);
     } catch {
       setMessages((prev) => [
         ...prev,
         {
           sender: "ai",
-          text:
-            "Sorry, something went wrong. Please try again in a moment.",
+          text: "Sorry, I’m having trouble reaching the support service right now. Please try again in a moment.",
         },
       ]);
     } finally {

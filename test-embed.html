@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Support Widget Embed Test</title>
+    <style>
+      body { font-family: Arial, Helvetica, sans-serif; padding: 40px; background: #f3f6fb }
+      #open-support { padding: 12px 18px; border-radius: 8px; background: #3b82f6; color: white; border: none; cursor: pointer }
+      #support-frame { position: fixed; right: 20px; bottom: 20px; width: 420px; height: 640px; border: 0; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.45); display: none }
+    </style>
+  </head>
+  <body>
+    <h2>Support Widget Embed Test</h2>
+    <p>This page demonstrates embedding the support widget from <code>http://localhost:5173/</code>.</p>
+
+    <button id="open-support">Need help</button>
+
+    <iframe id="support-frame" src="http://localhost:5173/" title="Support widget"></iframe>
+
+    <script>
+      const WIDGET_ORIGIN = 'http://localhost:5173'; // adjust if widget hosted elsewhere
+
+      const btn = document.getElementById('open-support');
+      const iframe = document.getElementById('support-frame');
+
+      btn.addEventListener('click', () => {
+        if (iframe.style.display === 'none' || iframe.style.display === '') {
+            // simply show the iframe so the widget shows its welcome screen
+            iframe.style.display = 'block';
+          } else {
+            // hide
+            iframe.style.display = 'none';
+          }
+      });
+
+      // optional: listen for messages from widget
+      window.addEventListener('message', (e) => {
+        // console.log('parent got message', e.origin, e.data);
+      });
+    </script>
+  </body>
+</html>

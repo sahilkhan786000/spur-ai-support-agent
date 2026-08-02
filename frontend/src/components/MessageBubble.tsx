@@ -1,14 +1,11 @@
-type Props = {
-  sender: "user" | "ai" | "system";
-  text: string;
-  label?: string;
-};
+export function MessageBubble({ message }: { message: { sender: "user" | "ai"; text: string } }) {
+  const isUser = message.sender === "user";
 
-export function MessageBubble({ sender, text, label }: Props) {
   return (
-    <div className={`bubble ${sender}`}>
-      {label && <div className="label">{label}</div>}
-      <div>{text}</div>
+    <div className={`message-row ${isUser ? "user-row" : "ai-row"}`}>
+      <div className={`bubble ${isUser ? "user-bubble" : "ai-bubble"}`}>
+        {message.text}
+      </div>
     </div>
   );
 }

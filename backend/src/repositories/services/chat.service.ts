@@ -8,13 +8,17 @@ import {
 } from "../message.repo";
 import { generateReply } from "./llm.service";
 
+type ChatHistoryEntry = {
+  sender: "user" | "ai";
+  text: string;
+};
+
 export async function handleChatMessage(
   message: string,
   sessionId?: string
 ) {
   let conversationId: string;
 
-  // 1️⃣ Ensure a valid session always exists
   if (!sessionId) {
     const convo = await createConversation();
     conversationId = convo.id;
@@ -28,26 +32,23 @@ export async function handleChatMessage(
     }
   }
 
-  // 2️⃣ Save user message no matter what
   await saveMessage(conversationId, "user", message);
 
-  // 3️⃣ Generate AI reply safely
   let reply: string;
 
   try {
     const history = await getMessages(conversationId);
-    reply = await generateReply(history, message);
+    const typedHistory: ChatHistoryEntry[] = history.map((entry) => ({
+      sender: entry.sender === "ai" ? "ai" : "user",
+      text: entry.text,
+    }));
+    reply = await generateReply(typedHistory, message);
   } catch (err) {
     console.error("LLM error:", err);
-
-    // Graceful fallback (IMPORTANT)
-    reply =
-      "Thanks for your question. A human support agent will assist you shortly.";
+    reply = "Thanks for your question. A human support agent will assist you shortly.";
   }
 
-  // 4️⃣ Save AI reply
   await saveMessage(conversationId, "ai", reply);
 
-  // 5️⃣ ALWAYS return sessionId
   return { reply, sessionId: conversationId };
 }

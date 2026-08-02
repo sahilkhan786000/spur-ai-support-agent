@@ -1,4 +1,4 @@
-const API_BASE = "https://spur-ai-support-agent-4m9d.onrender.com";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "https://spur-ai-support-agent-4m9d.onrender.com").replace(/\/$/, "");
 
 type SendMessageResponse = {
   reply: string;
@@ -20,12 +20,7 @@ type SessionsResponse = {
   }[];
 };
 
-
-
-export async function sendMessage(
-  message: string,
-  sessionId?: string
-): Promise<SendMessageResponse> {
+export async function sendMessage(message: string, sessionId?: string): Promise<SendMessageResponse> {
   const body = sessionId ? { message, sessionId } : { message };
 
   const res = await fetch(`${API_BASE}/chat/message`, {
@@ -41,14 +36,8 @@ export async function sendMessage(
   return res.json();
 }
 
-
-
-export async function fetchHistory(
-  sessionId: string
-): Promise<HistoryResponse> {
-  const res = await fetch(
-    `${API_BASE}/chat/history?sessionId=${sessionId}`
-  );
+export async function fetchHistory(sessionId: string): Promise<HistoryResponse> {
+  const res = await fetch(`${API_BASE}/chat/history?sessionId=${sessionId}`);
 
   if (!res.ok) {
     throw new Error("Failed to load chat history");
@@ -56,7 +45,6 @@ export async function fetchHistory(
 
   return res.json();
 }
-
 
 export async function fetchSessions(): Promise<SessionsResponse> {
   const res = await fetch(`${API_BASE}/chat/sessions`);

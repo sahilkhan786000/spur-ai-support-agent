@@ -1,32 +1,38 @@
 import { useState } from "react";
 
-export function ChatInput({
-  onSend,
-  disabled,
-}: {
-  onSend: (msg: string) => void;
-  disabled: boolean;
-}) {
+type Props = {
+  onSend: (text: string) => void;
+  loading?: boolean;
+};
+
+export function ChatInput({ onSend, loading }: Props) {
   const [text, setText] = useState("");
 
-  function send() {
-    if (!text.trim()) return;
-    onSend(text);
+  function handleSubmit() {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    onSend(trimmed);
     setText("");
   }
 
   return (
-    <div className="input-bar">
+    <form
+      className="chat-input"
+      onSubmit={(event) => {
+        event.preventDefault();
+        handleSubmit();
+      }}
+    >
       <input
         value={text}
-        disabled={disabled}
-        placeholder="Ask the universe..."
-        onChange={(e) => setText(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && send()}
+        onChange={(event) => setText(event.target.value)}
+        placeholder="Ask about your order, delivery, or refund..."
+        disabled={loading}
       />
-      <button disabled={disabled} onClick={send}>
-        Send
+      <button type="submit" disabled={loading || !text.trim()}>
+        {loading ? "Sending..." : "Send"}
       </button>
-    </div>
+    </form>
   );
 }

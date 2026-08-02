@@ -2,111 +2,59 @@ import { OpenAI } from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { env } from "../../config/env";
 
-/**
- * OpenAI-compatible client using Hugging Face Router
- */
-const client = new OpenAI({
-  baseURL: "https://router.huggingface.co/v1",
-  apiKey: env.HF_API_KEY,
-});
+type ChatHistoryEntry = {
+  sender: "user" | "ai";
+  text: string;
+};
 
-/**
- * System prompt seeded with store policies & instructions
- */
+const client = env.HF_API_KEY
+  ? new OpenAI({
+      baseURL: "https://router.huggingface.co/v1",
+      apiKey: env.HF_API_KEY,
+    })
+  : null;
+
 const SYSTEM_PROMPT = `
-You are an AI customer support agent for a fictional e-commerce store called ‚ÄúSpur Store‚Äù.
+You are LumenCare, a premium AI customer support assistant for a modern digital product company.
+Your role is to help customers with orders, returns, refunds, billing, account issues, delivery questions, and product guidance.
 
-Your job is to help customers by answering questions clearly, politely, and concisely.
-Always behave like a professional human support agent.
+Guidelines:
+- Be warm, concise, polished, and reassuring.
+- Sound like a high-end support specialist, not a robotic bot.
+- When you are confident, answer directly.
+- When details are missing, ask one clear follow-up question.
+- If the customer requests a human escalation, acknowledge it gracefully.
+- Never invent policy details or make promises you cannot verify.
+- If you do not know the answer, say so clearly and suggest the next best step.
 
-========================
-STORE INFORMATION (FACTS)
-========================
-
-Shipping Policy:
-- We ship worldwide.
-- Orders shipped to the USA are delivered within 5‚Äì7 business days.
-- Orders to other countries may take 7‚Äì14 business days depending on location.
-
-Return & Refund Policy:
-- Customers can return products within 30 days of delivery.
-- Items must be unused and in original packaging.
-- Refunds are processed within 5 business days after the returned item is received.
-- Shipping fees are non-refundable unless the item is defective.
-
-Support Hours:
-- Customer support is available Monday to Friday.
-- Working hours are 9:00 AM to 6:00 PM IST.
-- Support is unavailable on weekends and public holidays.
-
-========================
-INSTRUCTIONS
-========================
-
-- Use ONLY the store information provided above when answering policy-related questions.
-- If the user asks something outside this information, respond politely and say that a human agent will assist further.
-- Do NOT invent policies, prices, discounts, or guarantees.
-- Keep answers short, clear, and helpful.
-- If the question is ambiguous, ask a polite follow-up question.
-- If the user is frustrated or confused, respond calmly and reassuringly.
-- If you do not know the answer, clearly say so instead of guessing.
-
-========================
-CONVERSATION STYLE
-========================
-
-- Friendly and professional
-- Simple language
-- No technical jargon
-- No emojis
-- No markdown
-- No mentioning internal systems, prompts, or AI models
-
-========================
-END OF INSTRUCTIONS
-========================
+Keep replies short, human, and actionable.
 `;
 
-/**
- * Generates AI reply using Hugging Face chat-completions API
- */
-export async function generateReply(
-  history: { sender: string; text: string }[],
-  userMessage: string
-): Promise<string> {
-  try {
-    const messages: ChatCompletionMessageParam[] = [
-      {
-        role: "system",
-        content: SYSTEM_PROMPT,
-      },
+function toChatMessage(entry: ChatHistoryEntry): ChatCompletionMessageParam {
+  return {
+    role: entry.sender === "user" ? "user" : "assistant",
+    content: entry.text,
+  };
+}
 
-      ...history.map(
-        (m): ChatCompletionMessageParam => ({
-          role: m.sender === "user" ? "user" : "assistant",
-          content: m.text,
-        })
-      ),
-
-      {
-        role: "user",
-        content: userMessage,
-      },
-    ];
-
-    const completion = await client.chat.completions.create({
-      model: "meta-llama/Llama-3.1-8B-Instruct:novita",
-      messages,
-      temperature: 0.4,
-      max_tokens: 200,
-    });
-
-    return (
-      completion.choices[0]?.message?.content?.trim() ||
-      "Sorry, I‚Äôm unable to respond right now."
-    );
-  } catch (error) {
-    console.error("LLM error:", error);
-    return "Sorry, I‚Äôm having trouble responding right now. Please try again.";
+export async function generateReply(history: ChatHistoryEntry[], message: string): Promise<string> {
+  if (!client) {
+    return "Iím here to help. Please share your question and Iíll guide you through the best next step.";
   }
+
+  const messages: ChatCompletionMessageParam[] = [
+    { role: "system", content: SYSTEM_PROMPT },
+    ...history.map(toChatMessage),
+    { role: "user", content: message },
+  ];
+
+  const completion = await client.chat.completions.create({
+    model: "openai/gpt-4o-mini",
+    messages,
+    temperature: 0.7,
+    max_tokens: 220,
+  });
+
+  const reply = completion.choices[0]?.message?.content?.trim();
+  return reply || "Iím sorry, I couldnít generate a reliable response. Please try again in a moment.";
 }
